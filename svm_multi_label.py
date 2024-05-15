@@ -118,9 +118,9 @@ def analyze_data(data, labels_df):
     plt.show()
 
 
-def preprocess_data(data, threshold=0.40):
+def preprocess_data(data, threshold=0.90):
     """Preprocess data by scaling and normalization."""
-    selector = VarianceThreshold(0.05)
+    selector = VarianceThreshold(0.01)
     data_reduced = selector.fit_transform(data)
 
     # Scale data before applying PCA
@@ -164,6 +164,7 @@ def train_and_evaluate_svm(
             probability=True,
             class_weight="balanced",
             cache_size=1000,
+            verbose=True,
         )
 
     model = OneVsRestClassifier(
@@ -278,6 +279,8 @@ def main():
     y_train = labels[train_indices]
     y_test = labels[test_indices]
     C_values = [0.1, 1, 10, 100, 500]
+    linear_metrics = []
+    poly_metrics = []
     for C in C_values:
         print("Evaluating Linear SVM...")
         linear_results = train_and_evaluate_svm(
@@ -288,8 +291,7 @@ def main():
             C,
             class_labels,
         )
-        print("Linear SVM Results:", linear_results)
-        plot_results(linear_results, "Linear SVM")
+        linear_metrics.append(linear_results)
 
         # Transforming data using polynomial features
         print("Applying Polynomial Transformation...")
@@ -309,8 +311,10 @@ def main():
             class_labels,
             poly_features=True,
         )
-        print("Polynomial SVM Results:", poly_results)
-        plot_results(poly_results, "Polynomial SVM")
+        poly_metrics.append(poly_results)
+
+    plot_results(linear_metrics, "Linear SVM")
+    plot_results(poly_metrics, "Polynomial SVM")
 
 
 if __name__ == "__main__":
